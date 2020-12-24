@@ -7,3 +7,4 @@ C:\Users\ilya\source\repos\OOP\Lab7\Lab7\bin\Debug\Lab7.exe
 C:\Users\ilya\source\repos\OOP\Lab7\Lab7\bin\Debug\Lab7.pdb
 C:\Users\ilya\source\repos\OOP\Lab7\Lab7\obj\Debug\Lab7.exe
 C:\Users\ilya\source\repos\OOP\Lab7\Lab7\obj\Debug\Lab7.pdb
+C:\Users\ilya\source\repos\OOP\Lab7\Lab7\obj\Debug\Lab7.Main.resources

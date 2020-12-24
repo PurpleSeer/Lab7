@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,13 +17,28 @@ namespace Lab7
         {
             InitializeComponent();
         }
-
-        class Figure
+        public class Figure
         {
             public int x, y;
             public bool is_drawed = true;
             public Color fillcolor = Color.Aqua;
             private Color color = Color.Black;
+            public virtual string save() { return ""; }
+            public virtual void load(string x, string y, string c, string fillcolor) { }
+            public virtual void load(ref StreamReader sr, Figure figure, CreateFigure createFigure) { }
+            public virtual void GroupAddFigure(ref Figure object1) { }
+            public virtual void UnGroup(ref Storage stg, int c) { }
+            public virtual void paint_figure(Pen pen, Panel panel_drawing) { }
+            public virtual void move_x(int x, Panel panel_drawing) { }
+            public virtual void move_y(int y, Panel panel_drawing) { }
+            public virtual void changesize(int size) { }
+            public virtual bool checkfigure(int x, int y) { return false; }
+            public virtual void setcolor(Color color) { }
+            public virtual void caseswitch(ref StreamReader sr, ref Figure figure, CreateFigure createFigure) { }
+            public virtual void get_min_x(ref int f) { }
+            public virtual void get_max_x(ref int f) { }
+            public virtual void get_min_y(ref int f) { }
+            public virtual void get_max_y(ref int f) { }
 
             public void setColor(Color color)
             {
@@ -33,10 +49,145 @@ namespace Lab7
                 return color;
             }
         }
+        class Group : Figure
+        {
+            public int maxcount = 10;
+            public Figure[] group;
+            public int count;
+            int min_x = 99999, max_x = 0, min_y = 99999, max_y = 0;
+            public Group()
+            {   // Выделяем maxcount мест в хранилище
+                count = 0;
+                group = new Figure[maxcount];
+                for (int i = 0; i < maxcount; ++i)
+                    group[i] = null;
+            }
+            public override string save()
+            {   // Функция сохранения
+                string str = "Group" + "\n" + count;
+                for (int i = 0; i < count; ++i)
+                    str += "\n" + group[i].save();
+                return str;
+            }
+            public override void load(ref StreamReader sr, Figure figure, CreateFigure createFigure)
+            {   // Функция загрузки
+                int chislo = Convert.ToInt32(sr.ReadLine());
+                for (int i = 0; i < chislo; ++i)
+                {
+                    createFigure.caseswitch(ref sr, ref figure, createFigure);
+                    GroupAddFigure(ref figure);
+                }
+            }
+            public override void GroupAddFigure(ref Figure object1)
+            {   // Добавляет фигуру в группу
+                if (count >= maxcount)
+                    return;
+                group[count] = object1;
+                ++count;
+            }
+            public override void UnGroup(ref Storage stg, int c)
+            {   // Разгруппировка
+                stg.delete_object(c);
+                for (int i = 0; i < count; ++i)
+                {
+                    stg.add_object(index, ref group[i], k, ref indexin);
+                }
+            }
+            public override void paint_figure(Pen pen, Panel panel_drawing)
+            {   // Отображение группы
+                for (int i = 0; i < count; ++i)
+                {
+                    group[i].paint_figure(pen, panel_drawing);
+                }
+            }
+            public void getsize()
+            {
+                min_x = 99999; max_x = 0; min_y = 99999; max_y = 0;
+                for (int i = 0; i < count; ++i)
+                {
+                    int f = 0;
+                    group[i].get_min_x(ref f);
+                    if (f < min_x)
+                        min_x = f;
+                    group[i].get_max_x(ref f);
+                    if (f > max_x)
+                        max_x = f;
+                    group[i].get_min_y(ref f);
+                    if (f < min_y)
+                        min_y = f;
+                    group[i].get_max_y(ref f);
+                    if (f > max_y)
+                        max_y = f;
+                }
+            }
+            public override void move_x(int x, Panel panel_drawing)
+            {   // Перемещение по оси x
+                getsize();
+                if ((min_x + x) > 0 && (max_x + x) < panel_drawing.ClientSize.Width)
+                {
+                    for (int i = 0; i < count; ++i)
+                    {
+                        group[i].move_x(x, panel_drawing);
+                    }
+                }
+            }
+            public override void get_min_x(ref int f)
+            {
+                f = min_x;
+            }
+            public override void get_max_x(ref int f)
+            {
+                f = max_x;
+            }
+            public override void get_min_y(ref int f)
+            {
+                f = min_y;
+            }
+            public override void get_max_y(ref int f)
+            {
+                f = max_y;
+            }
+            public override void move_y(int y, Panel panel_drawing)
+            {   // Перемещение по оси y
+                getsize();
+                if ((min_y + y) > 0 && (max_y + y) < panel_drawing.ClientSize.Height)
+                {
+                    for (int i = 0; i < count; ++i)
+                    {
+                        group[i].move_y(y, panel_drawing);
+                    }
+                }
+            }
+            public override void changesize(int size)
+            {   // Изменение размера
+                for (int i = 0; i < count; ++i)
+                {
+                    group[i].changesize(size);
+                }
+            }
+            public override bool checkfigure(int x, int y)
+            {   // Проверка на фигуры
+                for (int i = 0; i < count; ++i)
+                {
+                    if (group[i].checkfigure(x, y))
+                        return true;
+                }
+                return false;
+            }
+            public override void setcolor(Color color)
+            {   // Установка цвета
+                for (int i = 0; i < count; ++i)
+                {
+                    group[i].setcolor(color);
+                }
+            }
 
+        }
         class Circle : Figure
         {
             public int rad = 30; // Радиус круга
+
+            public Circle() { }
             public Circle(int x, int y)
             {
                 this.x = x - rad;
@@ -44,11 +195,73 @@ namespace Lab7
             }
 
             ~Circle() { }
-        }
+            public override string save()
+            {   // Функция сохранения
+                return "Circle" + "\n" + x + "\n" + y + "\n" + rad + "\n" + fillcolor.ToArgb().ToString();
+            }
+            public override void load(string x, string y, string rad, string fillcolor)
+            {   // Функция загрузки
+                this.x = Convert.ToInt32(x);
+                this.y = Convert.ToInt32(y);
+                this.rad = Convert.ToInt32(rad);
+                this.fillcolor = Color.FromArgb(Convert.ToInt32(fillcolor));
+            }
+            public override void paint_figure(Pen pen, Panel panel_drawing)
+            {   // Отображение фигуры
+                SolidBrush figurefillcolor = new SolidBrush(fillcolor);
+                panel_drawing.CreateGraphics().DrawEllipse(
+                    pen, x, y, rad * 2, rad * 2);
+                panel_drawing.CreateGraphics().FillEllipse(
+                    figurefillcolor, x, y, rad * 2, rad * 2);
+            }
+            public override void get_min_x(ref int f)
+            {
+                f = x;
+            }
+            public override void get_max_x(ref int f)
+            {
+                f = x + (rad * 2);
+            }
+            public override void get_min_y(ref int f)
+            {
+                f = y;
+            }
+            public override void get_max_y(ref int f)
+            {
+                f = y + (rad * 2);
+            }
+            public override void move_x(int x, Panel panel_drawing)
+            {   // Перемещение по оси x
+                int c = this.x + x;
+                int gran = panel_drawing.ClientSize.Width - (rad * 2);
+                check(c, x, gran, gran - 2, ref this.x);
+            }
+            public override void move_y(int y, Panel panel_drawing)
+            {   // Перемещение по оси y
+                int c = this.y + y;
+                int gran = panel_drawing.ClientSize.Height - (rad * 2);
+                check(c, y, gran, gran - 2, ref this.y);
+            }
+            public override void changesize(int size)
+            {   // Изменение размера
+                rad += size;
+            }
+            public override bool checkfigure(int x, int y)
+            {   // Проверка на фигуры
+                return ((x - this.x - rad) * (x - this.x - rad) + (y - this.y - rad) *
+                    (y - this.y - rad)) < (rad * rad);
+            }
+            public override void setcolor(Color color)
+            {   // Установка цвета
+                fillcolor = color;
+            }
 
+        }
         class Square : Figure
         {
             public int x2, y2, size = 60;
+
+            public Square() { }
             public Square(int x, int y)
             {
                 this.x = x - size / 2;
@@ -58,19 +271,166 @@ namespace Lab7
             }
 
             ~Square() { }
-        }
 
+            public override string save()
+            {   // Функция сохранения
+                return "Square" + "\n" + x + "\n" + y + "\n" + size + "\n" + fillcolor.ToArgb().ToString();
+            }
+            public override void load(string x, string y, string size, string fillcolor)
+            {   // Функция загрузки
+                this.x = Convert.ToInt32(x);
+                this.y = Convert.ToInt32(y);
+                this.size = Convert.ToInt32(size);
+                this.fillcolor = Color.FromArgb(Convert.ToInt32(fillcolor));
+            }
+            public override void paint_figure(Pen pen, Panel panel_drawing)
+            {   // Отображение фигуры
+                SolidBrush figurefillcolor = new SolidBrush(fillcolor);
+                panel_drawing.CreateGraphics().DrawRectangle(pen,
+                    x, y, size, size);
+                panel_drawing.CreateGraphics().FillRectangle(figurefillcolor,
+                    x, y, size, size);
+            }
+            public override void get_min_x(ref int f)
+            {
+                f = x;
+            }
+            public override void get_max_x(ref int f)
+            {
+                f = x + size;
+            }
+            public override void get_min_y(ref int f)
+            {
+                f = y;
+            }
+            public override void get_max_y(ref int f)
+            {
+                f = y + size;
+            }
+            public override void move_x(int x, Panel panel_drawing)
+            {   // Перемещение по оси x
+                int s = this.x + x;
+                int gran = panel_drawing.ClientSize.Width - size;
+                check(s, x, gran, --gran, ref this.x);
+            }
+            public override void move_y(int y, Panel panel_drawing)
+            {   // Перемещение по оси y
+                int s = this.y + y;
+                int gran = panel_drawing.ClientSize.Height - size;
+                check(s, y, gran, --gran, ref this.y);
+            }
+            public override void changesize(int size)
+            {   // Изменение размера
+                this.size += size;
+            }
+            public override bool checkfigure(int x, int y)
+            {   // Проверка на фигуры
+                return (this.x <= x && x <= (this.x + size) &&
+                                        this.y <= y && y <= (this.y + size));
+            }
+            public override void setcolor(Color color)
+            {   // Установка цвета
+                fillcolor = color;
+            }
+        }
         class Line : Figure
         {
             public int lenght = 60, wight = 5;
+            public Line() { }
             public Line(int x, int y)
             {
                 this.x = x - lenght / 2;
                 this.y = y;
             }
             ~Line() { }
+            public override string save()
+            {   // Функция сохранения
+                return "Line" + "\n" + x + "\n" + y + "\n" + lenght + "\n" + fillcolor.ToArgb().ToString();
+            }
+            public override void load(string x, string y, string lenght, string fillcolor)
+            {   // Функция загрузки
+                this.x = Convert.ToInt32(x);
+                this.y = Convert.ToInt32(y);
+                this.lenght = Convert.ToInt32(lenght);
+                this.fillcolor = Color.FromArgb(Convert.ToInt32(fillcolor));
+            }
+            public override void paint_figure(Pen pen, Panel panel_drawing)
+            {   // Отображение фигуры
+                SolidBrush figurefillcolor = new SolidBrush(fillcolor);
+                panel_drawing.CreateGraphics().DrawRectangle(pen, x,
+                                        y, lenght, wight);
+                panel_drawing.CreateGraphics().FillRectangle(figurefillcolor, x,
+                    y, lenght, wight);
+            }
+            public override void get_min_x(ref int f)
+            {
+                f = x;
+            }
+            public override void get_max_x(ref int f)
+            {
+                f = x + lenght;
+            }
+            public override void get_min_y(ref int f)
+            {
+                f = y;
+            }
+            public override void get_max_y(ref int f)
+            {
+                f = y + wight;
+            }
+            public override void move_x(int x, Panel panel_drawing)
+            {   // Перемещение по оси x
+                int l = this.x + x;
+                int gran = panel_drawing.ClientSize.Width - lenght;
+                check(l, x, gran, --gran, ref this.x);
+            }
+            public override void move_y(int y, Panel panel_drawing)
+            {   // Перемещение по оси y
+                int l = this.y + y;
+                int gran = panel_drawing.ClientSize.Height - wight;
+                check(l, y, gran, --gran, ref this.y);
+            }
+            public override void changesize(int size)
+            {   // Изменение размера
+                lenght += size;
+            }
+            public override bool checkfigure(int x, int y)
+            {   // Проверка на фигуры
+                return (this.x <= x && x <= (this.x + lenght) && (this.y - 2) <= y &&
+                                    y <= (this.y + wight));
+            }
+            public override void setcolor(Color color)
+            {   // Установка цвета
+                fillcolor = color;
+            }
         }
-        class Storage
+        public class CreateFigure : Figure
+        {   // Используем Factory Method
+            public override void caseswitch(ref StreamReader sr, ref Figure figure, CreateFigure createFigure)
+            {
+                string str = sr.ReadLine();
+                switch (str)
+                {   // В зависимости какая фигура выбрана
+                    case "Circle":
+                        figure = new Circle();
+                        figure.load(sr.ReadLine(), sr.ReadLine(), sr.ReadLine(), sr.ReadLine());
+                        break;
+                    case "Line":
+                        figure = new Line();
+                        figure.load(sr.ReadLine(), sr.ReadLine(), sr.ReadLine(), sr.ReadLine());
+                        break;
+                    case "Square":
+                        figure = new Square();
+                        figure.load(sr.ReadLine(), sr.ReadLine(), sr.ReadLine(), sr.ReadLine());
+                        break;
+                    case "Group":
+                        figure = new Group();
+                        figure.load(ref sr, figure, createFigure);
+                        break;
+                }
+            }
+        }
+        public class Storage
         {
             public Figure[] objects;
 
@@ -141,7 +501,6 @@ namespace Lab7
             label_x.Text = "X: " + e.X.ToString();
             label_y.Text = "Y: " + e.Y.ToString();
         }
-
         private void paint_Figure(Color name, ref Storage stg, int index)
         {
             Pen pen = new Pen(name, 3);
@@ -178,7 +537,6 @@ namespace Lab7
                 }
             }
         }
-
         private void remove_selection_circle(ref Storage stg)
         {   // Снимает выделение у всех элементов хранилища
             for (int i = 0; i < k; ++i)
@@ -189,7 +547,6 @@ namespace Lab7
                 }
             }
         }
-
         private void remove_selected_circle(ref Storage stg)
         {   // Удаляет выделенные элементы из хранилища
             for (int i = 0; i < k; ++i)
@@ -208,8 +565,9 @@ namespace Lab7
         static int k = 5; // Кол-во ячеек в хранилище
         Storage storag = new Storage(k); // Создаем объект хранилища
         static int index = 0; // Кол-во нарисованных кругов
-        int indexin = 0; // Индекс, в какое место был помещён круг
+        static int indexin = 0; // Индекс, в какое место был помещён круг
         int size = 0;
+        string path = @"C:\Users\ilya\source\repos\OOP\Lab7\Lab7\Storage.txt";
 
         private int check_figure(ref Storage stg, int size, int x, int y)
         {   // Проверяет есть ли уже фигура с такими же координатами в хранилище
@@ -253,7 +611,6 @@ namespace Lab7
             }
             return -1;
         }
-
         private void button_clear_paintbox_Click(object sender, EventArgs e)
         {   // Очищает панель от кругов
             paint_box.Refresh(); // Перерисовывем панель paint_box
@@ -266,7 +623,6 @@ namespace Lab7
                 }
             }
         }
-
         private void button_show_Click(object sender, EventArgs e)
         {   // Отобразить все круги из хранилища
             paint_box.Refresh();
@@ -284,7 +640,6 @@ namespace Lab7
             }
 
         }
-
         private void button_deletestorage_Click(object sender, EventArgs e)
         {   // Удалить все круги из хранилища
             for (int i = 0; i < k; ++i)
@@ -293,7 +648,6 @@ namespace Lab7
             }
             index = 0;
         }
-
         private void paint_box_MouseClick(object sender, MouseEventArgs e)
         {
             //Проверка на наличие круга на данных координатах
@@ -361,7 +715,6 @@ namespace Lab7
             }
             p = 0;
         }
-
         private void Main_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete)
@@ -387,7 +740,6 @@ namespace Lab7
             paint_box.Refresh();
             paint_all(ref storag);
         }
-
         private void rb_Aqua_MouseClick(object sender, MouseEventArgs e)
         {
             for (int i = 0; i < k; ++i)
@@ -402,7 +754,6 @@ namespace Lab7
                 }
             }
         }
-
         private void rb_Green_MouseClick(object sender, MouseEventArgs e)
         {
             for (int i = 0; i < k; ++i)
@@ -415,7 +766,6 @@ namespace Lab7
                     }
             }
         }
-
         private void rb_Red_MouseClick(object sender, MouseEventArgs e)
         {
             for (int i = 0; i < k; ++i)
@@ -436,7 +786,6 @@ namespace Lab7
                 if (!stg.check_empty(i))
                     paint_Figure(stg.objects[i].getColor(), ref storag, i);
         }
-
         private void move_y(ref Storage stg, int y)
         {   // Функция для перемещения фигур по оси Y
             for (int i = 0; i < k; ++i)
@@ -445,41 +794,11 @@ namespace Lab7
                 {
                     if (stg.objects[i].getColor() == Color.White)
                     {   // Если объект выделен
-                        if (stg.objects[i] as Circle != null)
-                        {   // Если в хранилище круг
-                            Circle circle = stg.objects[i] as Circle;
-                            int c = circle.y + y;
-                            int gran = paint_box.ClientSize.Height - circle.rad * 2;
-                            // Проверяем на выход из границы поля
-                            check(c, y, gran, gran - 2, ref stg.objects[i], 2);
-                        }
-                        else
-                        {
-                            if (stg.objects[i] as Line != null)
-                            {   // Если в хранилище отрезок
-                                Line line = stg.objects[i] as Line;
-                                int l = line.y + y;
-                                int gran = paint_box.ClientSize.Height - line.wight;
-                                // Проверяем на выход из границы поля
-                                check(l, y, gran, --gran, ref stg.objects[i], 2);
-                            }
-                            else
-                            {
-                                if (stg.objects[i] as Square != null)
-                                {   // Если в хранилище квадрат
-                                    Square square = stg.objects[i] as Square;
-                                    int s = square.y + y;
-                                    int gran = paint_box.ClientSize.Height - square.size;
-                                    // Проверяем на выход из границы поля
-                                    check(s, y, gran, --gran, ref stg.objects[i], 2);
-                                }
-                            }
-                        }
+                        stg.objects[i].move_y(y, paint_box);
                     }
                 }
             }
         }
-
         private void move_x(ref Storage stg, int x)
         {   // Функция для перемещения фигур по оси X
             for (int i = 0; i < k; ++i)
@@ -488,58 +807,24 @@ namespace Lab7
                 {
                     if (stg.objects[i].getColor() == Color.White)
                     {   // Если объект выделен
-                        if (stg.objects[i] as Circle != null)
-                        {   // Если в хранилище круг
-                            Circle circle = stg.objects[i] as Circle;
-                            int c = circle.x + x;
-                            int gran = paint_box.ClientSize.Width - (circle.rad * 2);
-                            // Проверяем на выход из границы поля
-                            check(c, x, gran, gran - 2, ref stg.objects[i], 1);
-                        }
-                        else
-                        {
-                            if (stg.objects[i] as Line != null)
-                            {   // Если в хранилище отрезок
-                                Line line = stg.objects[i] as Line;
-                                int l = line.x + x;
-                                int gran = paint_box.ClientSize.Width - line.lenght;
-                                // Проверяем на выход из границы поля
-                                check(l, x, gran, --gran, ref stg.objects[i], 1);
-                            }
-                            else
-                            {
-                                if (stg.objects[i] as Square != null)
-                                {   // Если в хранилище квадрат
-                                    Square square = stg.objects[i] as Square;
-                                    int s = square.x + x;
-                                    int gran = paint_box.ClientSize.Width - square.size;
-                                    // Проверяем на выход из границы поля
-                                    check(s, x, gran, --gran, ref stg.objects[i], 1);
-                                }
-                            }
-                        }
+                        stg.objects[i].move_x(x, paint_box);
                     }
                 }
             }
         }
-
-        private void check(int f, int y, int gran, int gran1, ref Figure figures, int g)
+        static public void check(int f, int chislo, int gran, int gran1, ref int x)
         {   // Проверка на выход фигуры за границы
-            ref int b = ref figures.x;
-            if (g == 2)
-                b = ref figures.y;
             if (f > 0 && f < gran)
-                b += y;
+                x += chislo;
             else
             {
                 if (f <= 0)
-                    b = 1;
+                    x = 1;
                 else
                     if (f >= gran1)
-                    b = gran1;
+                    x = gran1;
             }
         }
-
         private void changesize(ref Storage stg, int size)
         {   // Увеличивает или уменьшает размер фигур, в зависимости от size
             for (int i = 0; i < k; ++i)
@@ -548,35 +833,11 @@ namespace Lab7
                 {   // Если под i индексом в хранилище есть объект
                     if (stg.objects[i].getColor() == Color.White)
                     {
-                        if (stg.objects[i] as Circle != null)
-                        {   // Если в хранилище круг
-                            Circle circle = stg.objects[i] as Circle;
-                            circle.rad += size;
-                        }
-                        else
-                        {
-                            if (stg.objects[i] as Line != null)
-                            {   // Если в хранилище отрезок
-                                Line line = stg.objects[i] as Line;
-                                line.lenght += size;
-                                line.wight += size / 2;
-                            }
-                            else
-                            {
-                                if (stg.objects[i] as Square != null)
-                                {   // Если в хранилище квадрат
-                                    Square square = stg.objects[i] as Square;
-                                    square.size += size;
-                                    square.x2 = square.size;
-                                    square.y2 = square.size;
-                                }
-                            }
-                        }
+                        stg.objects[i].changesize(size);
                     }
                 }
             }
         }
-
         private void btn_Minus_Click(object sender, EventArgs e)
         {
             size = -5;
@@ -584,7 +845,6 @@ namespace Lab7
             paint_box.Refresh();
             paint_all(ref storag);
         }
-
         private void btn_Plus_Click(object sender, EventArgs e)
         {
             size = 5;

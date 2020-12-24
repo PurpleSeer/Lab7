@@ -44,6 +44,10 @@
             this.rb_Yellow = new System.Windows.Forms.RadioButton();
             this.btn_Minus = new System.Windows.Forms.Button();
             this.btn_Plus = new System.Windows.Forms.Button();
+            this.btn_Group = new System.Windows.Forms.Button();
+            this.btn_Ungroup = new System.Windows.Forms.Button();
+            this.btn_Save = new System.Windows.Forms.Button();
+            this.btn_Load = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -54,7 +58,7 @@
             this.paint_box.ForeColor = System.Drawing.Color.Transparent;
             this.paint_box.Location = new System.Drawing.Point(13, 13);
             this.paint_box.Name = "paint_box";
-            this.paint_box.Size = new System.Drawing.Size(602, 505);
+            this.paint_box.Size = new System.Drawing.Size(602, 650);
             this.paint_box.TabIndex = 0;
             this.paint_box.MouseClick += new System.Windows.Forms.MouseEventHandler(this.paint_box_MouseClick);
             this.paint_box.MouseMove += new System.Windows.Forms.MouseEventHandler(this.paint_box_MouseMove);
@@ -225,12 +229,52 @@
             this.btn_Plus.UseVisualStyleBackColor = true;
             this.btn_Plus.Click += new System.EventHandler(this.btn_Plus_Click);
             // 
+            // btn_Group
+            // 
+            this.btn_Group.Location = new System.Drawing.Point(625, 522);
+            this.btn_Group.Name = "btn_Group";
+            this.btn_Group.Size = new System.Drawing.Size(80, 70);
+            this.btn_Group.TabIndex = 10;
+            this.btn_Group.Text = "Group";
+            this.btn_Group.UseVisualStyleBackColor = true;
+            // 
+            // btn_Ungroup
+            // 
+            this.btn_Ungroup.Location = new System.Drawing.Point(708, 522);
+            this.btn_Ungroup.Name = "btn_Ungroup";
+            this.btn_Ungroup.Size = new System.Drawing.Size(80, 70);
+            this.btn_Ungroup.TabIndex = 11;
+            this.btn_Ungroup.Text = "Ungroup";
+            this.btn_Ungroup.UseVisualStyleBackColor = true;
+            // 
+            // btn_Save
+            // 
+            this.btn_Save.Location = new System.Drawing.Point(625, 598);
+            this.btn_Save.Name = "btn_Save";
+            this.btn_Save.Size = new System.Drawing.Size(80, 70);
+            this.btn_Save.TabIndex = 12;
+            this.btn_Save.Text = "Save";
+            this.btn_Save.UseVisualStyleBackColor = true;
+            // 
+            // btn_Load
+            // 
+            this.btn_Load.Location = new System.Drawing.Point(708, 597);
+            this.btn_Load.Name = "btn_Load";
+            this.btn_Load.Size = new System.Drawing.Size(80, 70);
+            this.btn_Load.TabIndex = 13;
+            this.btn_Load.Text = "Load";
+            this.btn_Load.UseVisualStyleBackColor = true;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.LavenderBlush;
-            this.ClientSize = new System.Drawing.Size(803, 535);
+            this.ClientSize = new System.Drawing.Size(803, 675);
+            this.Controls.Add(this.btn_Load);
+            this.Controls.Add(this.btn_Save);
+            this.Controls.Add(this.btn_Ungroup);
+            this.Controls.Add(this.btn_Group);
             this.Controls.Add(this.btn_Plus);
             this.Controls.Add(this.btn_Minus);
             this.Controls.Add(this.groupBox2);
@@ -272,6 +316,10 @@
         private System.Windows.Forms.RadioButton rb_Yellow;
         private System.Windows.Forms.Button btn_Minus;
         private System.Windows.Forms.Button btn_Plus;
+        private System.Windows.Forms.Button btn_Group;
+        private System.Windows.Forms.Button btn_Ungroup;
+        private System.Windows.Forms.Button btn_Save;
+        private System.Windows.Forms.Button btn_Load;
     }
 }
 
