@@ -237,6 +237,7 @@
             this.btn_Group.TabIndex = 10;
             this.btn_Group.Text = "Group";
             this.btn_Group.UseVisualStyleBackColor = true;
+            this.btn_Group.Click += new System.EventHandler(this.btn_Group_Click);
             // 
             // btn_Ungroup
             // 
@@ -246,6 +247,7 @@
             this.btn_Ungroup.TabIndex = 11;
             this.btn_Ungroup.Text = "Ungroup";
             this.btn_Ungroup.UseVisualStyleBackColor = true;
+            this.btn_Ungroup.Click += new System.EventHandler(this.btn_Ungroup_Click);
             // 
             // btn_Save
             // 
@@ -255,6 +257,7 @@
             this.btn_Save.TabIndex = 12;
             this.btn_Save.Text = "Save";
             this.btn_Save.UseVisualStyleBackColor = true;
+            this.btn_Save.Click += new System.EventHandler(this.btn_Save_Click);
             // 
             // btn_Load
             // 
@@ -264,6 +267,7 @@
             this.btn_Load.TabIndex = 13;
             this.btn_Load.Text = "Load";
             this.btn_Load.UseVisualStyleBackColor = true;
+            this.btn_Load.Click += new System.EventHandler(this.btn_Load_Click);
             // 
             // Main
             // 

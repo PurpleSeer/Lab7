@@ -23,14 +23,15 @@ namespace Lab7
             public bool is_drawed = true;
             public Color fillcolor = Color.Aqua;
             private Color color = Color.Black;
+            public Figure() { }
             public virtual string save() { return ""; }
             public virtual void load(string x, string y, string c, string fillcolor) { }
             public virtual void load(ref StreamReader sr, Figure figure, CreateFigure createFigure) { }
             public virtual void GroupAddFigure(ref Figure object1) { }
             public virtual void UnGroup(ref Storage stg, int c) { }
-            public virtual void paint_figure(Pen pen, Panel panel_drawing) { }
-            public virtual void move_x(int x, Panel panel_drawing) { }
-            public virtual void move_y(int y, Panel panel_drawing) { }
+            public virtual void paint_figure(Pen pen, Panel paint_box) { }
+            public virtual void move_x(int x, Panel paint_box) { }
+            public virtual void move_y(int y, Panel paint_box) { }
             public virtual void changesize(int size) { }
             public virtual bool checkfigure(int x, int y) { return false; }
             public virtual void setcolor(Color color) { }
@@ -93,11 +94,11 @@ namespace Lab7
                     stg.add_object(index, ref group[i], k, ref indexin);
                 }
             }
-            public override void paint_figure(Pen pen, Panel panel_drawing)
+            public override void paint_figure(Pen pen, Panel paint_box)
             {   // Отображение группы
                 for (int i = 0; i < count; ++i)
                 {
-                    group[i].paint_figure(pen, panel_drawing);
+                    group[i].paint_figure(pen, paint_box);
                 }
             }
             public void getsize()
@@ -120,14 +121,14 @@ namespace Lab7
                         max_y = f;
                 }
             }
-            public override void move_x(int x, Panel panel_drawing)
+            public override void move_x(int x, Panel paint_box)
             {   // Перемещение по оси x
                 getsize();
-                if ((min_x + x) > 0 && (max_x + x) < panel_drawing.ClientSize.Width)
+                if ((min_x + x) > 0 && (max_x + x) < paint_box.ClientSize.Width)
                 {
                     for (int i = 0; i < count; ++i)
                     {
-                        group[i].move_x(x, panel_drawing);
+                        group[i].move_x(x, paint_box);
                     }
                 }
             }
@@ -147,14 +148,14 @@ namespace Lab7
             {
                 f = max_y;
             }
-            public override void move_y(int y, Panel panel_drawing)
+            public override void move_y(int y, Panel paint_box)
             {   // Перемещение по оси y
                 getsize();
-                if ((min_y + y) > 0 && (max_y + y) < panel_drawing.ClientSize.Height)
+                if ((min_y + y) > 0 && (max_y + y) < paint_box.ClientSize.Height)
                 {
                     for (int i = 0; i < count; ++i)
                     {
-                        group[i].move_y(y, panel_drawing);
+                        group[i].move_y(y, paint_box);
                     }
                 }
             }
@@ -186,14 +187,12 @@ namespace Lab7
         class Circle : Figure
         {
             public int rad = 30; // Радиус круга
-
             public Circle() { }
             public Circle(int x, int y)
             {
                 this.x = x - rad;
                 this.y = y - rad;
             }
-
             ~Circle() { }
             public override string save()
             {   // Функция сохранения
@@ -206,12 +205,12 @@ namespace Lab7
                 this.rad = Convert.ToInt32(rad);
                 this.fillcolor = Color.FromArgb(Convert.ToInt32(fillcolor));
             }
-            public override void paint_figure(Pen pen, Panel panel_drawing)
+            public override void paint_figure(Pen pen, Panel paint_box)
             {   // Отображение фигуры
                 SolidBrush figurefillcolor = new SolidBrush(fillcolor);
-                panel_drawing.CreateGraphics().DrawEllipse(
+                paint_box.CreateGraphics().DrawEllipse(
                     pen, x, y, rad * 2, rad * 2);
-                panel_drawing.CreateGraphics().FillEllipse(
+                paint_box.CreateGraphics().FillEllipse(
                     figurefillcolor, x, y, rad * 2, rad * 2);
             }
             public override void get_min_x(ref int f)
@@ -230,16 +229,16 @@ namespace Lab7
             {
                 f = y + (rad * 2);
             }
-            public override void move_x(int x, Panel panel_drawing)
+            public override void move_x(int x, Panel paint_box)
             {   // Перемещение по оси x
                 int c = this.x + x;
-                int gran = panel_drawing.ClientSize.Width - (rad * 2);
+                int gran = paint_box.ClientSize.Width - (rad * 2);
                 check(c, x, gran, gran - 2, ref this.x);
             }
-            public override void move_y(int y, Panel panel_drawing)
+            public override void move_y(int y, Panel paint_box)
             {   // Перемещение по оси y
                 int c = this.y + y;
-                int gran = panel_drawing.ClientSize.Height - (rad * 2);
+                int gran = paint_box.ClientSize.Height - (rad * 2);
                 check(c, y, gran, gran - 2, ref this.y);
             }
             public override void changesize(int size)
@@ -283,12 +282,12 @@ namespace Lab7
                 this.size = Convert.ToInt32(size);
                 this.fillcolor = Color.FromArgb(Convert.ToInt32(fillcolor));
             }
-            public override void paint_figure(Pen pen, Panel panel_drawing)
+            public override void paint_figure(Pen pen, Panel paint_box)
             {   // Отображение фигуры
                 SolidBrush figurefillcolor = new SolidBrush(fillcolor);
-                panel_drawing.CreateGraphics().DrawRectangle(pen,
+                paint_box.CreateGraphics().DrawRectangle(pen,
                     x, y, size, size);
-                panel_drawing.CreateGraphics().FillRectangle(figurefillcolor,
+                paint_box.CreateGraphics().FillRectangle(figurefillcolor,
                     x, y, size, size);
             }
             public override void get_min_x(ref int f)
@@ -307,16 +306,16 @@ namespace Lab7
             {
                 f = y + size;
             }
-            public override void move_x(int x, Panel panel_drawing)
+            public override void move_x(int x, Panel paint_box)
             {   // Перемещение по оси x
                 int s = this.x + x;
-                int gran = panel_drawing.ClientSize.Width - size;
+                int gran = paint_box.ClientSize.Width - size;
                 check(s, x, gran, --gran, ref this.x);
             }
-            public override void move_y(int y, Panel panel_drawing)
+            public override void move_y(int y, Panel paint_box)
             {   // Перемещение по оси y
                 int s = this.y + y;
-                int gran = panel_drawing.ClientSize.Height - size;
+                int gran = paint_box.ClientSize.Height - size;
                 check(s, y, gran, --gran, ref this.y);
             }
             public override void changesize(int size)
@@ -354,12 +353,12 @@ namespace Lab7
                 this.lenght = Convert.ToInt32(lenght);
                 this.fillcolor = Color.FromArgb(Convert.ToInt32(fillcolor));
             }
-            public override void paint_figure(Pen pen, Panel panel_drawing)
+            public override void paint_figure(Pen pen, Panel paint_box)
             {   // Отображение фигуры
                 SolidBrush figurefillcolor = new SolidBrush(fillcolor);
-                panel_drawing.CreateGraphics().DrawRectangle(pen, x,
+                paint_box.CreateGraphics().DrawRectangle(pen, x,
                                         y, lenght, wight);
-                panel_drawing.CreateGraphics().FillRectangle(figurefillcolor, x,
+                paint_box.CreateGraphics().FillRectangle(figurefillcolor, x,
                     y, lenght, wight);
             }
             public override void get_min_x(ref int f)
@@ -378,16 +377,16 @@ namespace Lab7
             {
                 f = y + wight;
             }
-            public override void move_x(int x, Panel panel_drawing)
+            public override void move_x(int x, Panel paint_box)
             {   // Перемещение по оси x
                 int l = this.x + x;
-                int gran = panel_drawing.ClientSize.Width - lenght;
+                int gran = paint_box.ClientSize.Width - lenght;
                 check(l, x, gran, --gran, ref this.x);
             }
-            public override void move_y(int y, Panel panel_drawing)
+            public override void move_y(int y, Panel paint_box)
             {   // Перемещение по оси y
                 int l = this.y + y;
-                int gran = panel_drawing.ClientSize.Height - wight;
+                int gran = paint_box.ClientSize.Height - wight;
                 check(l, y, gran, --gran, ref this.y);
             }
             public override void changesize(int size)
@@ -460,7 +459,8 @@ namespace Lab7
             public void delete_object(int ind)
             {   // Удаляет объект из хранилища
                 objects[ind] = null;
-                index--;
+                if (index > 0)
+                    index--;
             }
 
             public bool check_empty(int index)
@@ -503,38 +503,11 @@ namespace Lab7
         }
         private void paint_Figure(Color name, ref Storage stg, int index)
         {
-            Pen pen = new Pen(name, 3);
-            SolidBrush figurefillcolor;
-            if (!storag.check_empty(index))
+            if (!stg.check_empty(index))
             {
-                figurefillcolor = new SolidBrush(stg.objects[index].fillcolor);
-                if (storag.objects[index] as Circle != null)
-                {
-                    Circle circle = storag.objects[index] as Circle;
-                    paint_box.CreateGraphics().DrawEllipse(pen, circle.x, circle.y, circle.rad * 2, circle.rad * 2);
-                    paint_box.CreateGraphics().FillEllipse(figurefillcolor, circle.x, circle.y, circle.rad * 2, circle.rad * 2);
-                    stg.objects[index].setColor(name);
-                }
-                else
-                {
-                    if (storag.objects[index] as Square != null)
-                    {
-                        Square square = storag.objects[index] as Square;
-                        paint_box.CreateGraphics().DrawRectangle(pen, square.x, square.y, square.x2, square.y2);
-                        paint_box.CreateGraphics().FillRectangle(figurefillcolor, square.x, square.y, square.x2, square.y2);
-                        stg.objects[index].setColor(name);
-                    }
-                    else
-                    {
-                        if (storag.objects[index] as Line != null)
-                        {
-                            Line line = storag.objects[index] as Line;
-                            paint_box.CreateGraphics().DrawRectangle(pen, line.x, line.y, line.lenght, line.wight);
-                            paint_box.CreateGraphics().FillRectangle(figurefillcolor, line.x, line.y, line.lenght, line.wight);
-                            stg.objects[index].setColor(name);
-                        }
-                    }
-                }
+                Pen pen = new Pen(name, 3);
+                stg.objects[index].setColor(name);
+                stg.objects[index].paint_figure(pen, paint_box);
             }
         }
         private void remove_selection_circle(ref Storage stg)
@@ -577,35 +550,8 @@ namespace Lab7
                 {
                     if (!stg.check_empty(i))
                     {   // Если под i индексом в хранилище есть объект
-                        if (stg.objects[i] as Circle != null)
-                        {   // Если в хранилище круг
-                            Circle circle = stg.objects[i] as Circle;
-                            if (((x - circle.x - circle.rad) * (x - circle.x - circle.rad) +
-                                (y - circle.y - circle.rad) * (y - circle.y - circle.rad))
-                                < (circle.rad * circle.rad))
-                                return i;
-                        }
-                        else
-                        {
-                            if (stg.objects[i] as Line != null)
-                            {   // Если в хранилище отрезок
-                                Line line = stg.objects[i] as Line;
-                                if (line.x <= x && x <= (line.x + line.lenght) && (line.y - 2) <= y &&
-                                    y <= (line.y + line.wight))
-                                    return i;
-                            }
-                            else
-                            {
-                                if (stg.objects[i] as Square != null)
-                                {   // Если в хранилище квадрат
-                                    Square square = stg.objects[i] as Square;
-                                    if (square.x <= x && x <= (square.x + square.size) &&
-                                        square.y <= y && y <= (square.y + square.size))
-                                        return i;
-                                }
-                            }
-                        }
-
+                        if (stg.objects[i].checkfigure(x, y))
+                            return i;
                     }
                 }
             }
@@ -748,7 +694,7 @@ namespace Lab7
                 {
                     if (storag.objects[i].getColor() == Color.White)
                     {
-                        storag.objects[i].fillcolor = Color.Aqua;
+                        storag.objects[i].setcolor(Color.Aqua);
                         paint_Figure(Color.Black, ref storag, i);
                     }
                 }
@@ -761,7 +707,7 @@ namespace Lab7
                 if (!storag.check_empty(i))
                     if (storag.objects[i].getColor() == Color.White)
                     {
-                        storag.objects[i].fillcolor = Color.Green;
+                        storag.objects[i].setcolor(Color.Green);
                         paint_Figure(Color.Black, ref storag, i);
                     }
             }
@@ -774,7 +720,7 @@ namespace Lab7
                 {
                     if (storag.objects[i].getColor() == Color.White)
                     {
-                        storag.objects[i].fillcolor = Color.Red;
+                        storag.objects[i].setcolor(Color.Red);
                         paint_Figure(Color.Black, ref storag, i);
                     }
                 }
@@ -878,6 +824,7 @@ namespace Lab7
                         return;
                     }
             }
+            paint_all(ref storag);
         }
         private void btn_Save_Click(object sender, EventArgs e)
         {   // Сохраяем хранилище в файл
