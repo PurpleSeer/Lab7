@@ -852,5 +852,66 @@ namespace Lab7
             paint_box.Refresh();
             paint_all(ref storag);
         }
+
+        private void btn_Group_Click(object sender, EventArgs e)
+        {   // Создаём группу из выделенных фигур
+            Figure group = new Group();
+            for (int i = 0; i < k; ++i)
+            {
+                if (!storag.check_empty(i))
+                    if (storag.objects[i].getColor() == Color.White)
+                    {
+                        group.GroupAddFigure(ref storag.objects[i]);
+                        storag.delete_object(i);
+                    }
+            }
+            storag.add_object(index, ref group, k, ref indexin);
+        }
+        private void btn_Ungroup_Click(object sender, EventArgs e)
+        {   // Разгруппировка группы
+            for (int i = 0; i < k; ++i)
+            {
+                if (!storag.check_empty(i))
+                    if (storag.objects[i].getColor() == Color.White)
+                    {
+                        storag.objects[i].UnGroup(ref storag, i);
+                        return;
+                    }
+            }
+        }
+        private void btn_Save_Click(object sender, EventArgs e)
+        {   // Сохраяем хранилище в файл
+            using (StreamWriter sw = new StreamWriter(path, false, System.Text.Encoding.Default))
+            {
+                sw.WriteLine(storag.occupied(k));
+                for (int i = 0; i < k; ++i)
+                {
+                    if (!storag.check_empty(i))
+                    {
+                        sw.WriteLine(storag.objects[i].save());
+                    }
+                }
+            }
+        }
+        private void btn_Load_Click(object sender, EventArgs e)
+        {   // Загружаем данные из файла
+            StreamReader sr = new StreamReader(path, System.Text.Encoding.Default);
+            {
+                string str = sr.ReadLine();
+                int strend = Convert.ToInt32(str);
+                for (int i = 0; i < strend; ++i)
+                {
+                    Figure figure = new Figure();
+                    CreateFigure create = new CreateFigure();
+                    create.caseswitch(ref sr, ref figure, create);
+                    if (index == k)
+                        storag.doubleSize(ref k);
+                    storag.add_object(index, ref figure, k, ref indexin);
+                    ++index;
+                }
+                paint_all(ref storag);
+                sr.Close();
+            }
+        }
     }
 }
